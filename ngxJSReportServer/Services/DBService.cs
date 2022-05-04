@@ -10,7 +10,7 @@ namespace ngxJSReportServer.Services
         public static List<DBTable> GetTables()
         {
             List<DBTable> tables = new List<DBTable>();
-            using (SqlConnection conn = new SqlConnection("Data Source=(local);Initial Catalog=MySchool;Integrated Security=True;Asynchronous Processing=true;"))
+            using (SqlConnection conn = new SqlConnection("Server=(local);Initial Catalog=TFH_SVIL;Persist Security Info=False;Encrypt=true;Integrated Security=SSPI;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"))
             {
                 try
                 {
@@ -28,7 +28,7 @@ namespace ngxJSReportServer.Services
                             TableType = "Table",
                             Fields = new()
                         };
-
+                        tables.Add(curr);
                         tableFilter[2] = r[2].ToString();
                         DataTable fs = conn.GetSchema("Columns", tableFilter);
                         foreach (DataRow f in fs.Rows)
