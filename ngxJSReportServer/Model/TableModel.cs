@@ -1,11 +1,11 @@
 ﻿namespace ngxJSReportServer.Model
 {
-    public class DBTable
+    public class TableModel
     {
         public string OriginalName { get; set; }
         public string Name { get; set; }
-        public List<DBField> Fields { get; set; }
-        public string TableType { get; set; }
+        public List<FieldModel> Fields { get; set; }
+        public string? TableType { get; set; }
 
     }
 }

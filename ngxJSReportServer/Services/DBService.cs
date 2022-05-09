@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
 using ngxJSReportServer.Model;
 using System.Data;
 
@@ -7,9 +8,9 @@ namespace ngxJSReportServer.Services
     public class DBService
     {
 
-        public static List<DBTable> GetTables()
+        public static List<TableModel> GetTables()
         {
-            List<DBTable> tables = new List<DBTable>();
+            List<TableModel> tables = new List<TableModel>();
             using (SqlConnection conn = new SqlConnection("Server=(local);Initial Catalog=TFH_SVIL;Persist Security Info=False;Encrypt=true;Integrated Security=SSPI;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"))
             {
                 try
@@ -17,11 +18,11 @@ namespace ngxJSReportServer.Services
                     conn.Open();
 
                     DataTable ts = conn.GetSchema("Tables");
-                    DBTable curr = null;
+                    TableModel curr = null;
                     String[] tableFilter = new String[4];
                     foreach (DataRow r in ts.Rows)
                     {
-                        curr = new DBTable()
+                        curr = new TableModel()
                         {
                             Name = r[2].ToString(),
                             OriginalName = r[2].ToString(),
@@ -33,7 +34,7 @@ namespace ngxJSReportServer.Services
                         DataTable fs = conn.GetSchema("Columns", tableFilter);
                         foreach (DataRow f in fs.Rows)
                         {
-                            curr.Fields.Add(new DBField()
+                            curr.Fields.Add(new FieldModel()
                             {
                                 Name = f[3].ToString(),
                                 OriginalName = f[3].ToString(),
@@ -57,6 +58,27 @@ namespace ngxJSReportServer.Services
                 }
             }
             return tables;
+        }
+
+
+        public static object ExecuteQuery(string query)
+        {
+            using (SqlConnection conn = new SqlConnection("Server=(local);Initial Catalog=TFH_SVIL;Persist Security Info=False;Encrypt=true;Integrated Security=SSPI;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"))
+            {
+                try
+                {
+                    conn.Open();
+                    return conn.Query(query).AsList();
+                }
+                catch
+                {
+                    throw;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
         }
     }
 }

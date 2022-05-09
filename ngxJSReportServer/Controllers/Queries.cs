@@ -7,15 +7,16 @@ namespace ngxJSReportServer.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class Database : ControllerBase
+    public class Queries : ControllerBase
     {
         
-        [HttpGet]
-        public List<TableModel> TableList()
+        [HttpPost]
+        public object TableList(QueryModel q)
         {
-            return DBService.GetTables();
+            string query = QueryService.GetQuery(q);
+            return DBService.ExecuteQuery(query);
+
         }
-        
         
 
     }

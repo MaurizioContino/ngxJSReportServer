@@ -1,6 +1,6 @@
 ﻿namespace ngxJSReportServer.Model
 {
-    public class DBField
+    public class FieldModel
     {
         public string Id { get; set; }
         public string Parent { get; set; }
