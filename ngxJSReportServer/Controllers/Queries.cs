@@ -17,7 +17,13 @@ namespace ngxJSReportServer.Controllers
             return DBService.ExecuteQuery(query);
 
         }
-        
+
+        [HttpPost("query")]
+        public string PrepareQuery(QueryModel q)
+        {
+            return QueryService.GetQuery(q);
+        }
+
 
     }
 }

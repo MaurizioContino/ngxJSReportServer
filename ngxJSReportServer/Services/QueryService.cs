@@ -24,7 +24,7 @@ namespace ngxJSReportServer.Services
             {
                 tmp += string.Join(",",
                     q.SelectedFields.Select(f =>
-                         "\n\t" + (f.GroupType == "" || f.GroupType == "Group" ? f.OriginalName : f.GroupType + '(' + f.OriginalName + ')') + " as [" + f.Name + "]")
+                         "\n\t" + (f.GroupType == "" || f.GroupType == "Group" ? f.Parent + "." + f.OriginalName : f.GroupType + '(' + f.Parent + "." + f.OriginalName + ')') + " as [" + f.Name + "]")
                 );
             }
             else

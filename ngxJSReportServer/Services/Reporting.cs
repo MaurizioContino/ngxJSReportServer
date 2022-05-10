@@ -6,15 +6,16 @@ namespace ngxJSReportServer.Services
 {
     public static class Reporting
     {
-        public static async Task<Stream> RenderJsReport(string body, string header, QueryModel q)
+        public static async Task<Stream> RenderJsReport(string body, QueryModel q, string ReportModel)
         {
             var rs = new ReportingService("http://localhost:5488");
             
             IList<Script> scripts = new List<Script>();
             scripts.Add(new Script {
-                Content = GenerateSqlScript("jsreport", "jsreport", "localhost", "TFH_SVIL", QueryService.GetQuery(q)),
+                Content = BootStrapScript("jsreport", "jsreport", "localhost", "TFH_SVIL", QueryService.GetQuery(q), ReportModel),
             });
-
+            
+            
             Report r = await rs.RenderAsync(new RenderRequest
             {
                 Template = new Template()
@@ -25,36 +26,40 @@ namespace ngxJSReportServer.Services
                     Recipe = Recipe.ChromePdf,
                     Chrome = new Chrome
                     {
-                        MarginTop = "2cm"
+                        MarginTop = "2cm",
+                        MarginLeft = "2cm",
+                        MarginRight = "2cm",
+                        MarginBottom = "2cm"
                     },
                     PdfOperations = new List<PdfOperation>()
                     {
-                        new PdfOperation()
+                       
+                         new PdfOperation()
                         {
                             Type = PdfOperationType.Merge,
                             Template = new Template
                             {
-                                Content = header,
-                                Engine = Engine.None,
+                                Name="TollHostHeader",
+                                Engine = Engine.Handlebars,
                                 Recipe = Recipe.ChromePdf
                             }
-                        }
+                        }                        
                     },
                     
                 }
             });
             return r.Content;
         }
-        static string GenerateSqlScript(string username, string password, string server, string database, string query)
+        static string BootStrapScript(string username, string password, string server, string database, string query, string reportModel)
         {
-            return $@"
+            var x = $@"
             const sql = require('mssql');
+            {{#asset TollHostFunc.js @encoding=utf8}}
             const config = {{
                 'user': '{username}',
                 'password': '{password}',
                 'server': '{server}',
                 'database': '{database}',
-                'stream': 'false',
                 'options': {{
                     'trustedConnection': true,
                     'encrypt': false,
@@ -65,10 +70,11 @@ namespace ngxJSReportServer.Services
             async function beforeRender(req, res) {{
                 await sql.connect(config)
                 const sqlReq = new sql.Request();
-                const recordset = await sqlReq.query(`{query}`)
-                Object.assign(req.data, {{ data: recordset }});
+                const dbdata = await sqlReq.query(`{query}`)
+                const model = JSON.parse('{reportModel}')
+                req.data.groups = BootStrap(model, dbdata.recordset);
             }}";
-
+            return x;
         }
 
     }

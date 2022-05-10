@@ -14,7 +14,7 @@ namespace ngxJSReportServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Get(ReportRequest req)
         {
-            var stream = await Reporting.RenderJsReport(req.Content,"",req.q);
+            var stream = await Reporting.RenderJsReport(req.Content,req.q, req.ReportModel);
             var memory = new MemoryStream();
             await stream.CopyToAsync(memory);
             memory.Position = 0;

@@ -5,6 +5,7 @@
 
         public string Content { get; set; }
         public QueryModel q { get; set; }
+        public string ReportModel { get; set; }
 
     }
 }
