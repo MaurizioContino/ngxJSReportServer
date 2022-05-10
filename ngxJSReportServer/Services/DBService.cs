@@ -11,7 +11,7 @@ namespace ngxJSReportServer.Services
         public static List<TableModel> GetTables()
         {
             List<TableModel> tables = new List<TableModel>();
-            using (SqlConnection conn = new SqlConnection("Server=(local);Initial Catalog=TFH_SVIL;Persist Security Info=False;Encrypt=true;Integrated Security=SSPI;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"))
+            using (SqlConnection conn = new SqlConnection("Server=10.86.1.103;Initial Catalog=TFH_SVIL;persist security info=True;User id=sa; Password=KPI2019!;trustServerCertificate=true"))
             {
                 try
                 {
@@ -63,7 +63,7 @@ namespace ngxJSReportServer.Services
 
         public static object ExecuteQuery(string query)
         {
-            using (SqlConnection conn = new SqlConnection("Server=(local);Initial Catalog=TFH_SVIL;Persist Security Info=False;Encrypt=true;Integrated Security=SSPI;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"))
+            using (SqlConnection conn = new SqlConnection("Server=10.86.1.103;Initial Catalog=TFH_SVIL;persist security info=True;User id=sa; Password=KPI2019!;trustServerCertificate=true"))
             {
                 try
                 {
