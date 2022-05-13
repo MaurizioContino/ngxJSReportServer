@@ -11,7 +11,7 @@ namespace ngxJSReportServer.Services
             var from = CalculateFrom(q);
             var groupby = CalculateGroup(q);
             var where = "";
-            var sort = "";
+            var sort = CalculateOrder(q);
 
             return select + " \n" + from + " \n" + groupby + " \n" + where + " \n" + sort;
         }
@@ -110,5 +110,24 @@ namespace ngxJSReportServer.Services
                         return "INNER JOIN";
                 }
             }
+
+        private static string CalculateOrder(QueryModel q)
+        {
+            var tmp = "SELECT ";
+            if (q.SelectedFields.Length > 0)
+            {
+                tmp += string.Join(",",
+                    q.SelectedFields.Select(f => "[" + f.Name + "]"));
+            }
+            else
+            {
+                tmp += "*";
+            }
+            return tmp;
         }
+    }
+        
+
+
+
 }

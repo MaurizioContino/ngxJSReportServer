@@ -6,42 +6,47 @@ namespace ngxJSReportServer.Services
 {
     public static class Reporting
     {
-        const string basetemplate = @"<table>
+        const string basetemplate = @"
+        <html>
+            <body style='padding:20px'>
+                <table>
   
-{{#each groups}}
-  {{#each key_values}}
-    <tr>
-        <td>{{label}}</td>
-        <td>{{value}}</td>
-    </tr>
-  {{/each}}
+                {{#each groups}}
+                  {{#each key_values}}
+                    <tr>
+                        <td>{{label}}</td>
+                        <td>{{value}}</td>
+                    </tr>
+                  {{/each}}
+                {{/each}}
+                </table>
 
-  
-{{/each}}
-</table>
+                <table>
+                            {{#each rows}}
 
-<table>
-            {{#each rows}}
+                        <tr>
+                            {{#each ../fields}}
+                                <td>{{getValue ../this this}}</td>
+                            {{/each}}
+                        </tr>
+                            {{/each}}
 
-        <tr>
-            {{#each ../fields}}
-                <td>{{getValue ../this this}}</td>
-            {{/each}}
-        </tr>
-            {{/each}}
-
-</table>
+                </table>
+            </body>
+        </html>
 ";
 
         public static async Task<Stream> RenderJsReport(string body, QueryModel q, string ReportModel)
         {
             var rs = new ReportingService("http://localhost:5488");
+            var auth = SessionManager.getAuth(q.SessionId);
             try
             {
                 IList<Script> scripts = new List<Script>();
+                
                 scripts.Add(new Script
                 {
-                    Content = BootStrapScript("sa", "KPI2019!", "10.86.1.103", "TFH_SVIL", QueryService.GetQuery(q), ReportModel),
+                    Content = BootStrapScript(auth.UserName!, auth.Password!, auth.Server!, auth.Database!, QueryService.GetQuery(q), ReportModel),
                 });
 
 

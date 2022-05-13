@@ -8,14 +8,18 @@ namespace ngxJSReportServer.Services
     public class DBService
     {
 
-        public static List<TableModel> GetTables()
+        public static DBModel GetTables(SQLAuthModel Auth)
         {
             List<TableModel> tables = new List<TableModel>();
-            using (SqlConnection conn = new SqlConnection("Server=10.86.1.103;Initial Catalog=TFH_SVIL;persist security info=True;User id=sa; Password=KPI2019!;trustServerCertificate=true"))
+            var ret = new DBModel();
+            
+            using (SqlConnection conn = new SqlConnection($"Server={Auth.Server};Initial Catalog={Auth.Database};persist security info=True;User id={Auth.UserName}; Password={Auth.Password};trustServerCertificate=true"))
             {
                 try
                 {
                     conn.Open();
+
+                    ret.SessionId = SessionManager.createSession(Auth);
 
                     DataTable ts = conn.GetSchema("Tables");
                     TableModel curr = null;
@@ -57,13 +61,14 @@ namespace ngxJSReportServer.Services
                     conn.Close();
                 }
             }
-            return tables;
+            ret.Tables = tables;
+            return ret;
         }
 
 
-        public static object ExecuteQuery(string query)
+        public static object ExecuteQuery(string query, SQLAuthModel Auth)
         {
-            using (SqlConnection conn = new SqlConnection("Server=10.86.1.103;Initial Catalog=TFH_SVIL;persist security info=True;User id=sa; Password=KPI2019!;trustServerCertificate=true"))
+            using (SqlConnection conn = new SqlConnection($"Server={Auth.Server};Initial Catalog={Auth.Database};persist security info=True;User id={Auth.UserName}; Password={Auth.Password};trustServerCertificate=true"))
             {
                 try
                 {

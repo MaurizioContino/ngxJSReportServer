@@ -10,10 +10,10 @@ namespace ngxJSReportServer.Controllers
     public class Database : ControllerBase
     {
         
-        [HttpGet]
-        public List<TableModel> TableList()
+        [HttpPost]
+        public DBModel TableList(SQLAuthModel Auth)
         {
-            return DBService.GetTables();
+            return DBService.GetTables(Auth);
         }
         
         

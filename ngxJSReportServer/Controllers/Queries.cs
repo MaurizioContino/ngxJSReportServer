@@ -14,13 +14,15 @@ namespace ngxJSReportServer.Controllers
         public object TableList(QueryModel q)
         {
             string query = QueryService.GetQuery(q);
-            return DBService.ExecuteQuery(query);
+            var auth = SessionManager.getAuth(q.SessionId);
+            return DBService.ExecuteQuery(query, auth);
 
         }
 
         [HttpPost("query")]
         public string PrepareQuery(QueryModel q)
         {
+            var auth = SessionManager.getAuth(q.SessionId);
             return QueryService.GetQuery(q);
         }
 
