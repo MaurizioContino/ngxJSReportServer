@@ -113,7 +113,7 @@ namespace ngxJSReportServer.Services
 
         private static string CalculateOrder(QueryModel q)
         {
-            var tmp = "SELECT ";
+            var tmp = "ORDER BY ";
             if (q.SelectedFields.Length > 0)
             {
                 tmp += string.Join(",",

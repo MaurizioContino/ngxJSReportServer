@@ -7,34 +7,61 @@ namespace ngxJSReportServer.Services
     public static class Reporting
     {
         const string basetemplate = @"
-        <html>
-            <body style='padding:20px'>
-                <table>
+<html>
+<head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/metro/4.1.5/css/metro.min.css'>
+    <style>
+        {{asset 'tollhost.css' 'utf8'}}
+    </style>
+</head>
+<body>
   
-                {{#each groups}}
-                  {{#each key_values}}
-                    <tr>
-                        <td>{{label}}</td>
-                        <td>{{value}}</td>
-                    </tr>
-                  {{/each}}
-                {{/each}}
-                </table>
+    {{#*inline 'group'}}
+    <table>
+        {{#each key_values}}
+        <tr>
+            <td>{{label}}</td>
+            <td>{{value}}</td>
+        </tr>
+        {{/each}}
+    </table>
+    {{#if this.rows.key_values}} {{>group}} {{else}}
+    <tr>
+      <td colspan='2'>  
+        {{>items}}
+      </td>
+    </tr>
+    {{/if}} {{/inline}} {{#*inline 'items'}}
+    <table class='table striped'>
+       <thead>
+        <tr >
+            {{#each this.fields}}
+            <th>{{this.label}}</th>
+            {{/each}}
+        </tr>
+       </thead>
+       <tbody>
+        {{#each rows}}
+        <tr>
+            {{#each ../fields}}
+            <td style='width={{getwidth this}}; overflow: hidden'>{{getValue ../this this}}</td>
+            {{/each}}
+        </tr>
+        {{/each}}
+       </tbody>
+    </table>
 
-                <table>
-                            {{#each rows}}
-
-                        <tr>
-                            {{#each ../fields}}
-                                <td>{{getValue ../this this}}</td>
-                            {{/each}}
-                        </tr>
-                            {{/each}}
-
-                </table>
-            </body>
-        </html>
-";
+    {{/inline}} 
+    {{#each groups}}
+     {{{pdfCreatePagesGroup key}}}
+     {{>group}} 
+    
+     {{/each}}
+    
+</body>
+</html>
+       ";
 
         public static async Task<Stream> RenderJsReport(string body, QueryModel q, string ReportModel)
         {
@@ -49,8 +76,7 @@ namespace ngxJSReportServer.Services
                     Content = BootStrapScript(auth.UserName!, auth.Password!, auth.Server!, auth.Database!, QueryService.GetQuery(q), ReportModel),
                 });
 
-
-                Report r = await rs.RenderAsync(new RenderRequest
+                var rr = new RenderRequest
                 {
                     Template = new Template()
                     {
@@ -58,30 +84,48 @@ namespace ngxJSReportServer.Services
                         Scripts = scripts,
                         Engine = Engine.Handlebars,
                         Recipe = Recipe.ChromePdf,
-                        Chrome = new Chrome
+                        Chrome = new Chrome()
                         {
-                            MarginTop = "2cm",
-                            MarginLeft = "2cm",
-                            MarginRight = "2cm",
-                            MarginBottom = "2cm"
+                            //MarginTop = "0cm",
+                            //MarginBottom = "0cm",
+                            //MediaType = MediaType.Print,
+                            //MarginLeft = "1cm",
+                            //MarginRight = "1cm"
                         },
                         PdfOperations = new List<PdfOperation>()
-                    {
-
-                         new PdfOperation()
                         {
-                            Type = PdfOperationType.Merge,
-                            Template = new Template
+
+                             new PdfOperation()
                             {
-                                Name="TollHostHeader",
-                                Engine = Engine.Handlebars,
-                                Recipe = Recipe.ChromePdf
+                                Type = PdfOperationType.Merge,
+                                Template = new Template
+                                {
+                                    Name="TollHostHeader",
+                                    Engine = Engine.Handlebars,
+                                    Recipe = Recipe.ChromePdf,
+                                    Chrome = new Chrome()
+                                    {
+                                        //MarginTop = "0cm",
+                                        //MarginBottom = "0cm",
+                                        //MediaType = MediaType.Print,
+                                        //MarginLeft = "1cm",
+                                        //MarginRight = "1cm"
+                                    }
+                                }
                             }
-                        }
-                    },
+                        },
 
                     }
-                });
+                };
+                
+                rr.Template.Chrome.MarginTop = "3cm";
+                rr.Template.Chrome.MarginBottom = "1cm";
+                rr.Template.Chrome.MediaType = MediaType.Print;
+                rr.Template.Chrome.MarginLeft = "1cm";
+                rr.Template.Chrome.MarginRight = "1cm";
+                rr.Template.Chrome.Format = "A4";
+                rr.Template.Chrome.Height = "16cm";
+                Report r = await rs.RenderAsync(rr);
                 return r.Content;
             }
             catch(Exception ex)
@@ -112,9 +156,6 @@ namespace ngxJSReportServer.Services
                 const dbdata = await sqlReq.query(`{query}`)
                 const model = JSON.parse('{reportModel}')
                 req.data.groups = BootStrap(model, dbdata.recordset);
-                req.data.groups = BootStrap(model, dbdata.recordset);
-                req.data.fields = model.Details.Fields
-                req.data.rows = req.data.groups[0].rows 
             }}";
             return x;
         }
