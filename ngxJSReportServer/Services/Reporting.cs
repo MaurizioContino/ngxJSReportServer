@@ -7,35 +7,33 @@ namespace ngxJSReportServer.Services
     public static class Reporting
     {
         const string basetemplate = @"
+
 <html>
 <head>
     <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/metro/4.1.5/css/metro.min.css'>
+    <link rel='stylesheet' href='https://cdn.metroui.org.ua/v4/css/metro-all.min.css'>
     <style>
-        {{asset 'tollhost.css' 'utf8'}}
+        {{asset '/Sinelec/Shared/tollhost.css' 'utf8'}}
     </style>
 </head>
 <body>
   
     {{#*inline 'group'}}
-    <table>
-        {{#each key_values}}
-        <tr>
-            <td>{{label}}</td>
-            <td>{{value}}</td>
-        </tr>
-        {{/each}}
-    </table>
+    <div class='group-header'>
+            {{#each key_values}}
+            <div class='group-label'>{{label}}:</div> <div class='group-label'>{{value}}</div>
+            
+            {{/each}}
+    </div>
     {{#if this.rows.key_values}} {{>group}} {{else}}
-    <tr>
-      <td colspan='2'>  
+    
+    <div class='details-container'>
         {{>items}}
-      </td>
-    </tr>
+    </div>
     {{/if}} {{/inline}} {{#*inline 'items'}}
-    <table class='table striped'>
+    <table class='table compact row-border'>
        <thead>
-        <tr >
+        <tr>
             {{#each this.fields}}
             <th>{{this.label}}</th>
             {{/each}}
@@ -53,6 +51,9 @@ namespace ngxJSReportServer.Services
     </table>
 
     {{/inline}} 
+
+    <h1 class='title'>{{title.Title}}</h1>
+
     {{#each groups}}
      {{{pdfCreatePagesGroup key}}}
      {{>group}} 
@@ -61,6 +62,7 @@ namespace ngxJSReportServer.Services
     
 </body>
 </html>
+       
        ";
 
         public static async Task<Stream> RenderJsReport(string body, QueryModel q, string ReportModel)
@@ -86,45 +88,40 @@ namespace ngxJSReportServer.Services
                         Recipe = Recipe.ChromePdf,
                         Chrome = new Chrome()
                         {
-                            //MarginTop = "0cm",
-                            //MarginBottom = "0cm",
-                            //MediaType = MediaType.Print,
-                            //MarginLeft = "1cm",
-                            //MarginRight = "1cm"
+                            MarginTop = "3cm",
+                            MarginBottom = "2cm",
+                            MediaType = MediaType.Print,
+                            MarginLeft = "1cm",
+                            MarginRight = "1cm"
                         },
                         PdfOperations = new List<PdfOperation>()
                         {
 
                              new PdfOperation()
                             {
-                                Type = PdfOperationType.Merge,
                                 Template = new Template
                                 {
-                                    Name="TollHostHeader",
-                                    Engine = Engine.Handlebars,
+                                    Name = "TollHostHeader",
                                     Recipe = Recipe.ChromePdf,
+                                    Engine = Engine.Handlebars,
                                     Chrome = new Chrome()
                                     {
-                                        //MarginTop = "0cm",
-                                        //MarginBottom = "0cm",
-                                        //MediaType = MediaType.Print,
-                                        //MarginLeft = "1cm",
-                                        //MarginRight = "1cm"
-                                    }
-                                }
+                                        MarginTop = "1cm",
+                                        MarginBottom = "1cm",
+                                        MediaType = MediaType.Print,
+                                        MarginLeft = "1cm",
+                                        MarginRight = "1cm"
+                                    },
+                                },
+                                Type = PdfOperationType.Merge,
+                                MergeWholeDocument = true
                             }
                         },
 
                     }
                 };
                 
-                rr.Template.Chrome.MarginTop = "3cm";
-                rr.Template.Chrome.MarginBottom = "1cm";
-                rr.Template.Chrome.MediaType = MediaType.Print;
-                rr.Template.Chrome.MarginLeft = "1cm";
-                rr.Template.Chrome.MarginRight = "1cm";
-                rr.Template.Chrome.Format = "A4";
-                rr.Template.Chrome.Height = "16cm";
+               
                 Report r = await rs.RenderAsync(rr);
                 return r.Content;
             }
