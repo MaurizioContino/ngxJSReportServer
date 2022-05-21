@@ -2,7 +2,7 @@
 using Microsoft.Data.SqlClient;
 using ngxJSReportServer.Model;
 using System.Data;
-
+using ngxJSReportServer.Common;
 namespace ngxJSReportServer.Services
 {
     public class DBService
@@ -13,14 +13,12 @@ namespace ngxJSReportServer.Services
             List<TableModel> tables = new List<TableModel>();
             var ret = new DBModel();
             
-            using (SqlConnection conn = new SqlConnection($"Server={Auth.Server};Initial Catalog={Auth.Database};persist security info=True;User id={Auth.UserName}; Password={Auth.Password};trustServerCertificate=true"))
+            using (SqlConnection conn = new SqlConnection( Encription.Decrypt(Auth.ConnectionString)))
             {
                 try
                 {
                     conn.Open();
-
                     ret.SessionId = SessionManager.createSession(Auth);
-
                     DataTable ts = conn.GetSchema("Tables");
                     TableModel curr = null;
                     String[] tableFilter = new String[4];
@@ -45,7 +43,7 @@ namespace ngxJSReportServer.Services
                                 FieldType = f[7].ToString(),
                                 GroupType = "",
                                 Parent = curr.Name,
-                                Id = curr.Name + "." + f[3].ToString(),
+                                FieldId = curr.Name + "." + f[3].ToString(),
                                 Selected = false,
                                 Size = f[8].ToString(),
                             });
@@ -68,7 +66,7 @@ namespace ngxJSReportServer.Services
 
         public static object ExecuteQuery(string query, SQLAuthModel Auth)
         {
-            using (SqlConnection conn = new SqlConnection($"Server={Auth.Server};Initial Catalog={Auth.Database};persist security info=True;User id={Auth.UserName}; Password={Auth.Password};trustServerCertificate=true"))
+            using (SqlConnection conn = new SqlConnection(Encription.Decrypt(Auth.ConnectionString)))
             {
                 try
                 {

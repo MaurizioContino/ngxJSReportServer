@@ -1,10 +1,12 @@
 
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
+using ngxJSReportServer.DataAccess;
 
 const string corspolicies = "CORSPolicies";
 
 var builder = WebApplication.CreateBuilder(args);
-
+ConfigurationManager configuration = builder.Configuration;
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -43,7 +45,24 @@ builder.Services.AddControllers().AddNewtonsoftJson(opts =>
     opts.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 });
 
+string connString = configuration.GetConnectionString("AppConnection");
+
+builder.Services.AddDbContextFactory<AppDBContext>(options => {
+    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    options.UseSqlServer(connString);
+});
+
+builder.Services.AddScoped<AppDBContext>();
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDBContext>();
+    dbContext.Database.EnsureCreated();
+    // use context
+}
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -57,5 +76,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+    
 
 app.Run();

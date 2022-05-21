@@ -1,5 +1,6 @@
 ﻿using jsreport.Client;
 using jsreport.Types;
+using ngxJSReportServer.Common;
 using ngxJSReportServer.Model;
 
 namespace ngxJSReportServer.Services
@@ -75,7 +76,7 @@ namespace ngxJSReportServer.Services
                 
                 scripts.Add(new Script
                 {
-                    Content = BootStrapScript(auth.UserName!, auth.Password!, auth.Server!, auth.Database!, QueryService.GetQuery(q), ReportModel),
+                    Content = BootStrapScript(Encription.Decrypt(auth.ConnectionString), QueryService.GetQuery(q), ReportModel),
                 });
 
                 var rr = new RenderRequest
@@ -117,11 +118,8 @@ namespace ngxJSReportServer.Services
                                 MergeWholeDocument = true
                             }
                         },
-
                     }
                 };
-                
-               
                 Report r = await rs.RenderAsync(rr);
                 return r.Content;
             }
@@ -130,25 +128,16 @@ namespace ngxJSReportServer.Services
                 throw ;
             }
         }
-        static string BootStrapScript(string username, string password, string server, string database, string query, string reportModel)
+        static string BootStrapScript(string ConnectionString, string query, string reportModel)
         {
             var x = $@"
             const sql = require('mssql');
             {{#asset TollHostFunc.js @encoding=utf8}}
-            const config = {{
-                'user': '{username}',
-                'password': '{password}',
-                'server': '{server}',
-                'database': '{database}',
-                'options': {{
-                    'trustedConnection': true,
-                    'encrypt': false,
-                    'trustServerCertificate': true,
-                  }},
+            const connection = {ConnectionString},
             }}
 
             async function beforeRender(req, res) {{
-                await sql.connect(config)
+                await sql.connect(connection)
                 const sqlReq = new sql.Request();
                 const dbdata = await sqlReq.query(`{query}`)
                 const model = JSON.parse('{reportModel}')

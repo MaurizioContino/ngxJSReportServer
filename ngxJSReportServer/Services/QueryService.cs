@@ -57,7 +57,7 @@ namespace ngxJSReportServer.Services
                                 
                                 tmp += string.Join(" AND",
                                     cjoins.Select(j =>
-                                        j.f1.Id.Replace("_", ".") + " = " + j.f2.Id.Replace("_", ".")
+                                        j.f1.FieldId.Replace("_", ".") + " = " + j.f2.FieldId.Replace("_", ".")
                                     )
                                 );
 
@@ -121,7 +121,7 @@ namespace ngxJSReportServer.Services
             }
             else
             {
-                tmp += "*";
+                return "";
             }
             return tmp;
         }

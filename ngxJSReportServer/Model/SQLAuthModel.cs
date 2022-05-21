@@ -1,12 +1,15 @@
-﻿namespace ngxJSReportServer.Model
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+namespace ngxJSReportServer.Model
 {
     public class SQLAuthModel
     {
-        public string? IdSession { get; set; }
-        public string? UserName { get; set; }
-        public string? Password { get; set; }
-        public string? Server { get; set; }
-        public string? Database { get; set; }
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int SQLAuthModelId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+       
+        public string ConnectionString { get; set; }
 
     }
 }
